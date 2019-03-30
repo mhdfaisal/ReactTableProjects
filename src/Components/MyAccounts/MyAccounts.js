@@ -7,9 +7,9 @@ import cellEditFactory from 'react-bootstrap-table2-editor';
 
 import getData from '../../api/getData';
 
-class UsersTable extends React.Component{
+class MyAccounts extends React.Component{
 
-    state = {columns:[], users:[], columnIds:[]}
+    state = {columns:[], myAccounts:[], columnIds:[]}
 
     componentDidMount(){
         this.fetchUsersData();
@@ -18,17 +18,15 @@ class UsersTable extends React.Component{
     fetchUsersData = ()=>{
         getData.get("/rootData")
         .then(response =>{
-            let localUsers =[];
+            let localAccounts =[];
             response.data[0].myAccounts.forEach((account)=>{
-                account.myUsers.forEach((user)=>{
-                    localUsers = [...localUsers, user]
-                })
+               localAccounts = [...localAccounts, _.omit(account, "myUsers")]
             })
-            return _.uniqBy(localUsers, "id");
+            return localAccounts
             
         })
-        .then(localUsers =>{
-            this.setState({users:localUsers, columnIds:Object.keys(localUsers[0])}, 
+        .then(localAccounts =>{
+            this.setState({myAccounts:localAccounts, columnIds:Object.keys(localAccounts[0])}, 
             ()=> this.setColumns())
         })
     }
@@ -54,7 +52,7 @@ class UsersTable extends React.Component{
         return(
             <BootstrapTable keyField = "id"
             columns={this.state.columns}
-            data={this.state.users}
+            data={this.state.myAccounts}
             striped
             hover
             cellEdit = {cellEditFactory({mode:"dbclick",blurToSave:true})}
@@ -63,23 +61,15 @@ class UsersTable extends React.Component{
         )
     }
 
-
     render(){
-       return this.state.columns.length > 0 ? (
-           <div>
-               {this.renderTable()}
-           </div>
-       ) : (
-           <div>{this.renderSpinner()}</div>
-       )
-    }
+        return this.state.columns.length > 0 ? (
+            <div>
+                {this.renderTable()}
+            </div>
+        ) : (
+            <div>{this.renderSpinner()}</div>
+        )
+     }
 }
 
-export default UsersTable;
-
-//npm install --save axios
-
-//npm install --save lodash
-
-
-// npm install --save react-bootstrap-table2-filter
+export default MyAccounts;
