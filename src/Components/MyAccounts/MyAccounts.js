@@ -12,7 +12,25 @@ class MyAccounts extends React.Component{
     state = {columns:[], myAccounts:[], columnIds:[]}
 
     componentDidMount(){
-        this.fetchUsersData();
+        this.setUsersData();
+    }
+
+    componentDidUpdate(nextProps){
+        if(nextProps.data!== this.props.data){
+            this.setUsersData();
+        }
+    }
+
+
+    setUsersData = ()=>{
+        if(this.props.data.length>0){
+            let localAccounts =[];
+            this.props.data[0].myAccounts.forEach((account)=>{
+               localAccounts = [...localAccounts, _.omit(account, "myUsers")]
+            })
+            this.setState({myAccounts:localAccounts, columnIds:Object.keys(localAccounts[0])}, 
+            ()=> this.setColumns())
+        }
     }
 
     fetchUsersData = ()=>{

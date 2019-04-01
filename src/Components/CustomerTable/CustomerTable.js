@@ -12,7 +12,21 @@ class CustomerTable extends React.Component{
     state = {columns:[], customerData:[], columnIds:[]}
 
     componentDidMount(){
-        this.fetchUsersData();
+        this.setUsersData();
+    }
+
+    componentDidUpdate(nextProps){
+        if(nextProps.data!== this.props.data){
+            this.setUsersData();
+        }
+    }
+
+    setUsersData =()=>{
+        let localCustdata = _.omit(this.props.data[0], "myExecPolicy", "myAccounts")
+        this.setState({customerData:localCustdata, columnIds:Object.keys(localCustdata)}, 
+            ()=> {
+                // console.log(this.state.customerData)
+                this.setColumns()})
     }
 
     fetchUsersData = ()=>{
@@ -20,13 +34,13 @@ class CustomerTable extends React.Component{
         .then(response =>{
 
             let localCustdata = _.omit(response.data[0], "myExecPolicy", "myAccounts")
-            console.log(localCustdata)
+            // console.log(localCustdata)
             return localCustdata;
         })
         .then(localCustdata =>{
             this.setState({customerData:localCustdata, columnIds:Object.keys(localCustdata)}, 
             ()=> {
-                console.log(this.state.customerData)
+                // console.log(this.state.customerData)
                 this.setColumns()})
         })
     }

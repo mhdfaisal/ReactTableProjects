@@ -12,7 +12,14 @@ class UsersTable extends React.Component{
     state = {columns:[], users:[], columnIds:[]}
 
     componentDidMount(){
-        this.fetchUsersData();
+        this.setUsersData();
+    }
+
+    componentDidUpdate(prevProps){
+        if(prevProps.data!==this.props.data){
+            this.setUsersData();
+            console.log(prevProps.data, this.props.data)
+        }
     }
 
     fetchUsersData = ()=>{
@@ -32,6 +39,21 @@ class UsersTable extends React.Component{
             ()=> this.setColumns())
         })
     }
+
+    setUsersData = ()=>{
+        if(this.props.data.length>0)
+        {
+            let localUsers =[];
+            this.props.data[0].myAccounts.forEach((account)=>{
+                account.myUsers.forEach((user)=>{
+                    localUsers = [...localUsers, user]
+                })
+            })
+            this.setState({users:_.uniqBy(localUsers, "id"), columnIds:Object.keys(localUsers[0])}, 
+            ()=> this.setColumns())
+        }
+    }
+
 
     setColumns = ()=>{
         const localColumns = this.state.columnIds.map((item)=>{
