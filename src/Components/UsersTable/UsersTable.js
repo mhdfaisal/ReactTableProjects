@@ -18,7 +18,7 @@ class UsersTable extends React.Component{
     componentDidUpdate(prevProps){
         if(prevProps.data!==this.props.data){
             this.setUsersData();
-            console.log(prevProps.data, this.props.data)
+            // console.log(prevProps.data, this.props.data)
         }
     }
 

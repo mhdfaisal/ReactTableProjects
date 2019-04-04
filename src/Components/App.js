@@ -2,48 +2,36 @@ import React from 'react';
 import UsersTable from './UsersTable/UsersTable';
 import CustomerTable from './CustomerTable/CustomerTable';
 import MyAccounts from './MyAccounts/MyAccounts';
-import FormField from '../Components/Widgets/FormField';
+import SearchForm from '../Components/Widgets/SearchForm/SearchForm';
+
 import getData from '../api/getData';
 class App extends React.Component{
     
-     state = {data:[],
-            formData:{
-                search:{
-                    element:"input",
-                    value:"",
-                    config:{
-                        type:"text",
-                        placeholder:"Search box"
-                    }
-                }
-            }
-    }
+     state = {data:[]}
 
     componentDidMount(){
-        getData.get("/rootData")
+        //this.fetchData({searchBox:'rootData'});
+    }
+
+    fetchData = (resource)=>{
+        let URL = resource.searchBox;
+        // let URL1 = resource.custId;
+        // getData.get(`/${URL}/${URL1}`)
+        getData.get(`/${URL}`)
         .then(response=> this.setState({data:response.data}))
         .catch(err => console.log(err))
     }
-
-    onChangeHandler = (e, id)=>{
-        let newFormData = this.state.formData;
-        let newElement = this.state.formData[id];
-        newElement = {...newElement, value:e.target.value}
-        newFormData = {...newFormData, [id]:newElement}
-        // console.log(newFormData)
-        this.setState({formData:{...newFormData}})
-    }
     
+    handleSearchSubmit = (submittedValues)=>{
+        // console.log(submittedValues)
+        this.fetchData(submittedValues);
+    }
+
     render(){
 
         return(
             <div className="">
-                <form>
-                    <FormField id="search" formData={this.state.formData.search} change={this.onChangeHandler}/>
-
-                    <button type="submit" className="btn btn-primary">Go..</button>
-                </form>
-
+                <SearchForm handleSubmit={this.handleSearchSubmit}/>
                 <h3 className="my-4">Customer Table</h3>
                 <CustomerTable data={this.state.data}/>
                 <h3 className="my-4">MyAccounts Table</h3>
@@ -59,3 +47,4 @@ export default App;
 
 
 //npm install --save react-bootstrap-table-next react-bootstrap-table2-editor
+// npm install --save react-form
