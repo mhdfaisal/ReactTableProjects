@@ -8,11 +8,10 @@ import cellEditFactory from 'react-bootstrap-table2-editor';
 import axios from 'axios';
 
 import getData from '../../api/getData';
-import { reject } from 'q';
 
 class UsersTable extends React.Component{
 
-    state = {columns:[], users:[], columnIds:[], newlyAddedUsers:[], deletedRows:[]}
+    state = {columns:[], users:[], columnIds:[], newlyAddedUsers:[], deletedRows:[], modifiedRows:{}}
 
     componentDidMount(){
         this.setUsersData();
@@ -87,13 +86,15 @@ class UsersTable extends React.Component{
         let newRow = {};
         newRow ={...usersCopy[clickedRowIndex]}
 
-        let newRowId = prompt("Please enter a temporary ID", "000")
-        newRow = {...newRow, id:newRowId}
-        newUsers2 = [{...newRow, config:this.renderAddDelete(newRow)}, ...newUsers2];
-        
-        let finalUsers = newUsers1.concat(newUsers2);
-        this.setState({users:finalUsers});
-        this.setState({newlyAddedUsers:[...this.state.newlyAddedUsers,newRow]})
+        let newRowId = prompt("Please enter a temporary ID")
+        if(newRowId.trim()!==""){
+            newRow = {...newRow, id:newRowId}
+            newUsers2 = [{...newRow, config:this.renderAddDelete(newRow)}, ...newUsers2];
+            
+            let finalUsers = newUsers1.concat(newUsers2);
+            this.setState({users:finalUsers});
+            this.setState({newlyAddedUsers:[...this.state.newlyAddedUsers,newRow]})
+        }
     }
 
     setUsersData = ()=>{
@@ -113,6 +114,11 @@ class UsersTable extends React.Component{
 
     setColumns = ()=>{
         const localColumns = this.state.columnIds.map((item)=>{
+            if(item==="config"){
+                return {dataField:item, text:item, filter:textFilter(), editable: ()=>{
+                    return false;
+                }}
+            }
             return {dataField:item, text:item, filter:textFilter()}
         })
         this.setState({columns:localColumns});
@@ -135,11 +141,29 @@ class UsersTable extends React.Component{
             data={this.state.users}
             striped
             hover
-            cellEdit = {cellEditFactory({mode:"dbclick",blurToSave:true})}
+            cellEdit = {cellEditFactory({mode:"dbclick",blurToSave:true, afterSaveCell:(oldValue, newValue, row, column)=>{
+                if(oldValue!==newValue){
+                    this.addModifiedRow(row);
+                }
+            }})}
             filter = {filterFactory()}
             /> /*--Filtering --*/
         )
     }
+
+    addModifiedRow = (row)=>{
+        let newlyAddedFlag = false;
+        this.state.newlyAddedUsers.forEach((item,index)=>{
+            if(item.id === row.id){
+                newlyAddedFlag = true;
+            }
+        });
+        if(!newlyAddedFlag){
+            this.setState({modifiedRows:{...this.state.modifiedRows, [row.id]: _.omit(row, "config")}})
+        }
+    }
+    //newly added
+
 
     handleDataSubmit = ()=>{
         // this.state.newlyAddedUsers.forEach((item)=>{
