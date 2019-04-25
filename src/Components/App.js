@@ -6,12 +6,17 @@ import SearchForm from '../Components/Widgets/SearchForm/SearchForm';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
 import getData from '../api/getData';
+
 class App extends React.Component{
     
-     state = {data:[], data1:[]}
+     state = {data:[], data1:[], searchTerm:{}}
 
     componentDidMount(){
         //this.fetchData({searchBox:'rootData'});
+    }
+
+    fetchAfterUpdate = ()=>{
+        this.fetchData(this.state.searchTerm);
     }
 
     fetchData = (resource)=>{
@@ -33,6 +38,7 @@ class App extends React.Component{
     
     handleSearchSubmit = (submittedValues)=>{
         // console.log(submittedValues)
+        this.setState({searchTerm:submittedValues})
         this.fetchData(submittedValues);
     }
 
@@ -48,7 +54,7 @@ class App extends React.Component{
                     <h3 className="my-4">MyAccounts Table</h3>
                     <MyAccounts data={this.state.data}/>
                     <h3 className="my-4">My Users</h3>
-                    <UsersTable data={this.state.data}/>
+                    <UsersTable data={this.state.data} fetchAfterUpdate={this.fetchAfterUpdate}/>
                 </Tab>
                 <Tab eventKey="tab2" title="Tab 2">
                 <p>This is tab 2</p>

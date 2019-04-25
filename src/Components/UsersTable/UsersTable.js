@@ -41,11 +41,12 @@ class UsersTable extends React.Component{
         })
     }
 
-    renderAddDelete = (user)=>{
+    renderAddDelete = (user,flag)=>{
         return(
             <>
             <button className="btn btn-primary badge mr-2" onClick={(e)=>{this.addRow(e,user)}}>Add</button>
             <button className="btn btn-danger badge" onClick={(e)=>{this.removeRow(e,user)}}>Delete</button>
+            {flag ? <input type="checkbox" checked className="d-block mx-2 my-2"/> : null}
             </>
         )
     }
@@ -69,7 +70,10 @@ class UsersTable extends React.Component{
         else{
             this.setState({users:[...newUsers], deletedRows:[...this.state.deletedRows, user]})
         }
-        //If newly added
+        //If newly added.
+        // Post after getting a successful post. -1st priority
+        // properties reader.
+        // Error messages for request failures and success. - 2 nd priority
 
     }
     
@@ -89,7 +93,7 @@ class UsersTable extends React.Component{
         let newRowId = prompt("Please enter a temporary ID")
         if(newRowId.trim()!==""){
             newRow = {...newRow, id:newRowId}
-            newUsers2 = [{...newRow, config:this.renderAddDelete(newRow)}, ...newUsers2];
+            newUsers2 = [{...newRow, config:this.renderAddDelete(newRow,true)}, ...newUsers2];
             
             let finalUsers = newUsers1.concat(newUsers2);
             this.setState({users:finalUsers});
@@ -145,7 +149,8 @@ class UsersTable extends React.Component{
                 if(oldValue!==newValue){
                     this.addModifiedRow(row);
                 }
-            }})}
+            }
+        })}
             filter = {filterFactory()}
             /> /*--Filtering --*/
         )
@@ -153,14 +158,22 @@ class UsersTable extends React.Component{
 
     addModifiedRow = (row)=>{
         let newlyAddedFlag = false;
+        let newlyAddedIndex;
         this.state.newlyAddedUsers.forEach((item,index)=>{
             if(item.id === row.id){
                 newlyAddedFlag = true;
+                newlyAddedIndex = index;
             }
         });
         if(!newlyAddedFlag){
             this.setState({modifiedRows:{...this.state.modifiedRows, [row.id]: _.omit(row, "config")}})
         }
+        else if(newlyAddedFlag){
+            let localnewlyAddedUsers = this.state.newlyAddedUsers;
+            localnewlyAddedUsers[newlyAddedIndex] = _.omit(row,"config");
+            this.setState({newlyAddedUsers: [...localnewlyAddedUsers]});
+        }
+       
     }
     //newly added
 
@@ -180,6 +193,9 @@ class UsersTable extends React.Component{
             })
         Promise.all(networkRequests)
         .then(res => console.log(res))
+        .then(()=>{
+            this.props.fetchAfterUpdate();
+        })
         .catch(res=> console.log(res))
         
         }
@@ -190,7 +206,7 @@ class UsersTable extends React.Component{
 
 
     render(){
-        console.log(this.state.deletedRows)
+        // console.log(this.state.deletedRows)
        return this.state.columns.length > 0 ? (
            <div>
                <button className="btn btn-success ml-3 mt-3" onClick={this.handleDataSubmit}>Save</button>
