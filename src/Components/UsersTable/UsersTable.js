@@ -11,7 +11,7 @@ import getData from '../../api/getData';
 
 class UsersTable extends React.Component{
 
-    state = {columns:[], users:[], columnIds:[], newlyAddedUsers:[], deletedRows:[], modifiedRows:{}}
+    state = {columns:[], users:[], columnIds:[], newlyAddedUsers:[], deletedRows:[], modifiedRows:{}, successMsgs:[]}
 
     componentDidMount(){
         this.setUsersData();
@@ -192,17 +192,44 @@ class UsersTable extends React.Component{
                 })
             })
         Promise.all(networkRequests)
-        .then(res => console.log(res))
+        .then((res)=>{
+            let stringMsg ='';
+            const messages = res.map((item)=>{
+                stringMsg += item.data.id + " : " +item.statusText+'\n';
+                return {id: item.data.id,result : item.statusText}
+            })
+            this.setState({successMsgs:messages}, ()=>{
+                alert(stringMsg)
+            });
+        })
         .then(()=>{
             this.props.fetchAfterUpdate();
         })
-        .catch(res=> console.log(res))
+        .catch(err=> console.log(err))
+
+        // axios.post('')
+        // .then(res => {
+        //     alert(res);
+        //     axios.post('')
+        // })
         
         }
         //modify
         //color change
         //tabs
-   
+        
+        renderMessage = ()=>{
+            if(this.state.successMsgs.length>0){
+                const msg = this.state.successMsgs.map((item)=>{
+                    return <div>{item.id} : {item.result}</div>
+                })
+                // return <div className="alert alert-success">{msg}</div>;
+                alert(msg);
+            }
+            
+        }
+
+
 
 
     render(){

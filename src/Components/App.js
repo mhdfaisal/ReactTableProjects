@@ -9,7 +9,7 @@ import getData from '../api/getData';
 
 class App extends React.Component{
     
-     state = {data:[], data1:[], searchTerm:{}}
+     state = {data:[], data1:[], searchTerm:{}, key:'tab1'}
 
     componentDidMount(){
         //this.fetchData({searchBox:'rootData'});
@@ -42,11 +42,16 @@ class App extends React.Component{
         this.fetchData(submittedValues);
     }
 
-    render(){
+    //Tabs
+    //Display errors
+    //Property reader {order modification : {id:'order modification ffoo bar', yes:"true", label:'sang', no:"false"}}
 
+    // {id:'order modification ffoo bar', yes:"true", label:'sang', no:"false"}
+
+    render(){
         return(
             <>
-            <Tabs defaultActiveKey="tables" id="tables-tabs">
+            <Tabs defaultActiveKey="tables" id="tables-tabs" activeKey=''>
                 <Tab eventKey="tab1" title="Tab 1">
                     <SearchForm handleSubmit={this.handleSearchSubmit}/>
                     <h3 className="my-4">Customer Table</h3>
