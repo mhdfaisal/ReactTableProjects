@@ -6,6 +6,7 @@ import SearchForm from '../Components/Widgets/SearchForm/SearchForm';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
 import getData from '../api/getData';
+import * as properties from './properties';
 
 class App extends React.Component{
     
@@ -40,18 +41,24 @@ class App extends React.Component{
         // console.log(submittedValues)
         this.setState({searchTerm:submittedValues})
         this.fetchData(submittedValues);
+        this.setState({key:"tab3"}) //tab shift
     }
 
-    //Tabs
-    //Display errors
+    //Tabs -Done
+    //Display errors - Done
     //Property reader {order modification : {id:'order modification ffoo bar', yes:"true", label:'sang', no:"false"}}
 
-    // {id:'order modification ffoo bar', yes:"true", label:'sang', no:"false"}
-
     render(){
+        for(let obj in properties){
+           if(properties[obj].id.startsWith('order')){
+               console.log(obj);
+           }
+        
+        }
         return(
             <>
-            <Tabs defaultActiveKey="tables" id="tables-tabs" activeKey=''>
+            <Tabs defaultActiveKey="tables" id="tables-tabs" activeKey={this.state.key}
+            onSelect={key => this.setState({ key })}>
                 <Tab eventKey="tab1" title="Tab 1">
                     <SearchForm handleSubmit={this.handleSearchSubmit}/>
                     <h3 className="my-4">Customer Table</h3>

@@ -11,7 +11,7 @@ import getData from '../../api/getData';
 
 class UsersTable extends React.Component{
 
-    state = {columns:[], users:[], columnIds:[], newlyAddedUsers:[], deletedRows:[], modifiedRows:{}, successMsgs:[]}
+    state = {columns:[], users:[], columnIds:[], newlyAddedUsers:[], deletedRows:[], modifiedRows:{}, successMsgs:[], errorMsgs:[]}
 
     componentDidMount(){
         this.setUsersData();
@@ -179,58 +179,58 @@ class UsersTable extends React.Component{
 
 
     handleDataSubmit = ()=>{
-        // this.state.newlyAddedUsers.forEach((item)=>{
-        // axios.post('http://localhost:3001/rootData/', item)
-        // .then(res=> console.log(res))
-        // .catch(err => console.log(err));
-        // })
-        let networkRequests = this.state.newlyAddedUsers.map((item)=>{
-            return new Promise((resolve, reject)=>{
-                axios.post('http://localhost:3001/rootData/', item)
-                .then(res=> resolve(res))
-                .catch(err => reject(err));
+        let errorResponse;
+        let localSuccessMsgs = [];
+        let localErrorMsgs = [];
+        Promise.all(
+            this.state.newlyAddedUsers.map((item)=>
+                axios.post('http://localhost:3001/rootData',item).catch(err => {
+                    errorResponse = this.handleError(err)
+                    return errorResponse;
                 })
-            })
-        Promise.all(networkRequests)
+            ))
         .then((res)=>{
-            let stringMsg ='';
-            const messages = res.map((item)=>{
-                stringMsg += item.data.id + " : " +item.statusText+'\n';
-                return {id: item.data.id,result : item.statusText}
+            console.log(res);
+            res.forEach((item)=>{
+                console.log(item)
+                if(item.error){
+                    localErrorMsgs = [...localErrorMsgs, item]
+                }
+                else{
+                    localSuccessMsgs = [...localSuccessMsgs, item]
+                }
             })
-            this.setState({successMsgs:messages}, ()=>{
-                alert(stringMsg)
-            });
-        })
-        .then(()=>{
+            if(localSuccessMsgs.length > 0){
+                this.renderMessages(localSuccessMsgs);
+            }
+            if(localErrorMsgs.length > 0){
+                this.renderMessages(localErrorMsgs, true);
+            }
+        }).then(()=>{
+            this.setState({newlyAddedUsers:[]})
             this.props.fetchAfterUpdate();
         })
-        .catch(err=> console.log(err))
+        
+    }
 
-        // axios.post('')
-        // .then(res => {
-        //     alert(res);
-        //     axios.post('')
-        // })
-        
-        }
-        //modify
-        //color change
-        //tabs
-        
-        renderMessage = ()=>{
-            if(this.state.successMsgs.length>0){
-                const msg = this.state.successMsgs.map((item)=>{
-                    return <div>{item.id} : {item.result}</div>
-                })
-                // return <div className="alert alert-success">{msg}</div>;
-                alert(msg);
+    renderMessages = (arr, error=false) =>{
+        let stringMessage = '';
+        arr.forEach((item)=>{
+            if(error){
+                stringMessage += item.id + ": " + item.statusText+"\n";
             }
-            
-        }
+            else{
+                stringMessage += item.data['id'] + ": " + item.statusText+"\n";
+            }
+        })
+        alert(stringMessage);
+    }
 
-
-
+    handleError = (err)=>{
+        console.log(err)
+        let requestData = _.omit(JSON.parse(err.config.data),"config");
+        return {statusText:err.response.statusText, ...requestData, error:true}
+    }
 
     render(){
         // console.log(this.state.deletedRows)
